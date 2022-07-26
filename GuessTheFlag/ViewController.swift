@@ -15,6 +15,7 @@ class ViewController: UIViewController {
     var countries = [String]()
     var correctAnswer = 0
     var score = 0
+    var timesTapped = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +44,7 @@ class ViewController: UIViewController {
         askQuestion()
     }
     
-    func askQuestion() {
+    func askQuestion(action: UIAlertAction! = nil) {
         countries.shuffle()
         
         button1.setImage(UIImage(named: countries[0]), for: .normal)
@@ -51,7 +52,53 @@ class ViewController: UIViewController {
         button3.setImage(UIImage(named: countries[2]), for: .normal)
         
         correctAnswer = Int.random(in: 0...2)
-        title = countries[correctAnswer].uppercased()
+        title = "\(countries[correctAnswer].uppercased()) | Score: \(score)"
+    }
+    
+    @IBAction func buttonTapped(_ sender: UIButton) {
+        timesTapped += 1
+        
+        let title = setScore(sender.tag)
+        
+        let alertController = UIAlertController(title: title, message: "Your score is \(score).", preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: "Continue", style: .default, handler: askQuestion))
+        
+        
+        if timesTapped != 10 {
+            present(alertController, animated: true)
+        } else {
+            self.title = "\(countries[correctAnswer].uppercased()) | Score: \(score)"
+            showFinalScore()
+        }
+    }
+    
+    private func showFinalScore() {
+        let alertController = UIAlertController(title: title, message: "Your final score is \(score).", preferredStyle: .alert)
+        
+        score = 0
+        timesTapped = 0
+        
+        alertController.addAction(UIAlertAction(title: "Restart", style: .default, handler: askQuestion))
+        
+        present(alertController, animated: true)
+    }
+    
+    private func setScore(_ chosenTag: Int) -> String {
+        var title: String
+        
+        if chosenTag == correctAnswer {
+            title = "Correct"
+            score += 1
+        } else {
+            let tappedCountry = countries[chosenTag].uppercased()
+            title = "Wrong. That's the flag of \(tappedCountry)"
+            if score > 0  {
+                score -= 1
+            }
+        }
+        
+        return title
     }
 }
 
